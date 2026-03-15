@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}My Medicines - Medicine Reminder{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <span class="text-4xl">💊</span>
+                My Medicines
+            </h1>
+            <p class="text-gray-500 mt-1">Manage your medication schedule</p>
+        </div>
+        <button onclick="openAddModal()" 
+                class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
+            <span class="text-xl">➕</span>
+            Add Medicine
+        </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl p-4 shadow-lg border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-blue-100 rounded-xl">
+                    <span class="text-2xl">💊</span>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-800">{{ medicines|length if medicines else 0 }}</p>
+                    <p class="text-xs text-gray-500">Total Meds</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-lg border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-green-100 rounded-xl">
+                    <span class="text-2xl">✅</span>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-800" id="active-count">0</p>
+                    <p class="text-xs text-gray-500">Active</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-lg border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-orange-100 rounded-xl">
+                    <span class="text-2xl">⏰</span>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-800" id="today-count">0</p>
+                    <p class="text-xs text-gray-500">Today</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-4 shadow-lg border border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-purple-100 rounded-xl">
+                    <span class="text-2xl">📈</span>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-800">{{ adherence_rate|default(0) }}%</p>
+                    <p class="text-xs text-gray-500">Adherence</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="bg-white rounded-2xl p-4 shadow-lg mb-6 border border-gray-100">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1 relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+                <input type="text" id="search-input" placeholder="Search medicines..." 
+                       class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
+                       oninput="filterMedicines()">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="setFilter('all')" 
+                        class="filter-btn active px-4 py-2 rounded-xl font-medium transition-all" data-filter="all">
+                    All
+                </button>
+                <button onclick="setFilter('active')" 
+                        class="filter-btn px-4 py-2 rounded-xl font-medium transition-all" data-filter="active">
+                    Active
+                </button>
+                <button onclick="setFilter('inactive')" 
+                        class="filter-btn px-4 py-2 rounded-xl font-medium transition-all" data-filter="inactive">
+                    Inactive
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medicines Grid -->
+    <div id="medicines-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% if medicines %}
+        {% for medicine in medicines %}
+        <div class="medicine-card bg-white rounded-2xl p-5 shadow-lg border border-gray-100 hover:shadow-xl transition-all relative overflow-hidden"
+             data-active="{{ 'true' if medicine.active else 'false' }}"
+             data-name="{{ medicine.name|lower }}">
+            <!-- Status Badge -->
+            <div class="absolute top-4 right-4">
+                {% if medicine.active %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                    ✓ Active
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+                    Inactive
+                </span>
+                {% endif %}
+            </div>
+            
+            <!-- Medicine Icon & Name -->
+            <div class="flex items-start gap-4 mb-4">
+                <div class="p-3 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl">
+                    <span class="text-3xl">💊</span>
+                </div>
+                <div class="flex-1 pr-16">
+                    <h3 class="text-lg font-bold text-gray-800">{{ medicine.name }}</h3>
+                    <p class="text-sm text-gray-500">{{ medicine.dosage }}</p>
+                </div>
+            </div>
+            
+            <!-- Details -->
+            <div class="space-y-2 mb-4">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <span class="text-lg">⏰</span>
+                    <span>{{ medicine.frequency or 'Daily' }}</span>
+                </div>
+                {% if medicine.instructions %}
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <span class="text-lg">📝</span>
+                    <span>{{ medicine.instructions[:50] }}{% if medicine.instructions|length > 50 %}...{% endif %}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex gap-2 pt-4 border-t border-gray-100">
+                <a href="{{ url_for('medicine_details', medicine_id=medicine.id) }}" 
+                   class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition flex items-center justify-center gap-2">
+                    <span>👁️</span> View
+                </a>
+                <form method="POST" action="{{ url_for('delete_medicine', medicine_id=medicine.id) }}" 
+                      onsubmit="return confirm('Delete {{ medicine.name }}?');" class="flex-none">
+                    <button type="submit" 
+                            class="px-4 py-2 bg-red-100 text-red-700 rounded-xl text-sm font-medium hover:bg-red-200 transition">
+                        🗑️
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div id="empty-state" class="col-span-full flex flex-col items-center justify-center py-16 text-center">
+            <div class="text-8xl mb-4 opacity-50">💊</div>
+            <h3 class="text-xl font-bold text-gray-600 mb-2">No medicines yet</h3>
+            <p class="text-gray-500 mb-6">Add your first medicine to get started with reminders</p>
+            <a href="{{ url_for('add_medicine') }}" 
+               class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition">
+                ➕ Add Your First Medicine
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .filter-btn {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+    .filter-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .medicine-card {
+        animation: fadeInUp 0.5s ease;
+    }
+    .medicine-card.hidden {
+        display: none;
+    }
+</style>
+
+<script>
+    let currentFilter = 'all';
+    
+    function openAddModal() {
+        window.location.href = '{{ url_for("add_medicine") }}';
+    }
+    
+    function setFilter(filter) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === filter);
+        });
+        filterMedicines();
+    }
+    
+    function filterMedicines() {
+        const search = document.getElementById('search-input').value.toLowerCase();
+        const cards = document.querySelectorAll('.medicine-card');
+        let activeCount = 0;
+        
+        cards.forEach(card => {
+            const name = card.dataset.name;
+            const isActive = card.dataset.active === 'true';
+            
+            if (isActive) activeCount++;
+            
+            let show = true;
+            
+            if (search && !name.includes(search)) {
+                show = false;
+            }
+            
+            if (currentFilter === 'active' && !isActive) show = false;
+            if (currentFilter === 'inactive' && isActive) show = false;
+            
+            card.classList.toggle('hidden', !show);
+        });
+        
+        document.getElementById('active-count').textContent = activeCount;
+    }
+    
+    // Initialize counts on page load
+    document.addEventListener('DOMContentLoaded', filterMedicines);
+</script>
+{% endblock %}

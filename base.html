@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Medicine Reminder{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Animate.css for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#EEF2FF',
+                            100: '#E0E7FF',
+                            200: '#C7D2FE',
+                            300: '#A5B4FC',
+                            400: '#818CF8',
+                            500: '#6366F1',
+                            600: '#4F46E5',
+                            700: '#4338CA',
+                            800: '#3730A3',
+                            900: '#312E81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        
+        /* Custom Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        /* Glassmorphism Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c7d2fe;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #818cf8;
+        }
+        
+        /* Button Styles */
+        .btn-primary {
+            @apply bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-xl font-medium 
+                   hover:from-primary-600 hover:to-primary-700 transform hover:scale-105 transition-all duration-200 
+                   shadow-lg hover:shadow-xl active:scale-95;
+        }
+        
+        .btn-secondary {
+            @apply bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-medium 
+                   hover:bg-gray-200 transform hover:scale-105 transition-all duration-200 active:scale-95;
+        }
+        
+        .btn-danger {
+            @apply bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-xl font-medium 
+                   hover:from-red-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 
+                   shadow-lg hover:shadow-xl active:scale-95;
+        }
+        
+        .btn-success {
+            @apply bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl font-medium 
+                   hover:from-green-600 hover:to-green-700 transform hover:scale-105 transition-all duration-200 
+                   shadow-lg hover:shadow-xl active:scale-95;
+        }
+        
+        /* Card Hover Effect */
+        .card-hover {
+            @apply transform transition-all duration-300 hover:scale-102 hover:shadow-2xl;
+        }
+        
+        /* Input Focus Effect */
+        .input-focus {
+            @apply border-2 border-gray-200 rounded-xl px-4 py-3 w-full transition-all duration-200
+                   focus:border-primary-500 focus:ring-4 focus:ring-primary-100 focus:outline-none;
+        }
+        
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        /* Pulse Ring Animation */
+        .pulse-ring {
+            animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            50% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(0.8); opacity: 1; }
+        }
+        
+        /* Progress Bar Animation */
+        .progress-bar {
+            transition: width 1s ease-in-out;
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            @apply invisible opacity-0 absolute bg-gray-900 text-white text-xs rounded py-1 px-2 
+                   transition-all duration-200 -top-8 left-1/2 transform -translate-x-1/2;
+        }
+        
+        .tooltip-parent:hover .tooltip {
+            @apply visible opacity-100;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4F46E5;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Notification Badge */
+        .badge {
+            @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full 
+                   w-5 h-5 flex items-center justify-center animate-pulse;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-100 min-h-screen">
+    {% if session.user_id %}
+    <!-- Top Navigation Bar -->
+    <nav class="bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <a href="{{ url_for('dashboard') }}" class="flex items-center gap-3 group">
+                    <div class="p-2 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg group-hover:shadow-primary-200 transition-all duration-300">
+                        <span class="text-2xl">💊</span>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">MedRemind</span>
+                        <span class="text-xs text-gray-400 block">For Elderly Care</span>
+                    </div>
+                </a>
+                
+                <div class="flex items-center gap-6">
+                    <!-- Notification Bell -->
+                    <div class="relative tooltip-parent cursor-pointer">
+                        <div class="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                            <span class="text-xl">🔔</span>
+                        </div>
+                        <span class="tooltip">Notifications</span>
+                    </div>
+                    
+                    <!-- User Menu -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                            {{ session.user_name[0]|upper }}
+                        </div>
+                        <div class="hidden md:block">
+                            <p class="font-medium text-gray-800">{{ session.user_name }}</p>
+                            <p class="text-xs text-gray-500">Patient</p>
+                        </div>
+                    </div>
+                    
+                    <a href="{{ url_for('logout') }}" class="text-red-500 hover:text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl font-medium transition-all duration-200">
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Layout -->
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-72 min-h-screen bg-white/60 backdrop-blur-sm border-r border-gray-100 p-6 hidden lg:block sticky top-16 h-[calc(100vh-4rem)]">
+            <nav class="space-y-2">
+                <a href="{{ url_for('dashboard') }}" class="nav-item flex items-center gap-4 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200 {% if request.endpoint == 'dashboard' %}bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-200{% else %}text-gray-600 hover:bg-primary-50 hover:text-primary-700{% endif %}">
+                    <span class="text-xl">🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('medicines') }}" class="nav-item flex items-center gap-4 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200 {% if request.endpoint in ['medicines', 'add_medicine', 'medicine_details'] %}bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-200{% else %}text-gray-600 hover:bg-primary-50 hover:text-primary-700{% endif %}">
+                    <span class="text-xl">💊</span>
+                    <span>My Medicines</span>
+                </a>
+                <a href="{{ url_for('history') }}" class="nav-item flex items-center gap-4 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200 {% if request.endpoint == 'history' %}bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-200{% else %}text-gray-600 hover:bg-primary-50 hover:text-primary-700{% endif %}">
+                    <span class="text-xl">📊</span>
+                    <span>History</span>
+                </a>
+                <a href="{{ url_for('caregivers') }}" class="nav-item flex items-center gap-4 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200 {% if request.endpoint == 'caregivers' %}bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-200{% else %}text-gray-600 hover:bg-primary-50 hover:text-primary-700{% endif %}">
+                    <span class="text-xl">👥</span>
+                    <span>Caregivers</span>
+                </a>
+                <a href="{{ url_for('profile') }}" class="nav-item flex items-center gap-4 px-4 py-3.5 rounded-xl text-base font-medium transition-all duration-200 {% if request.endpoint == 'profile' %}bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-200{% else %}text-gray-600 hover:bg-primary-50 hover:text-primary-700{% endif %}">
+                    <span class="text-xl">⚙️</span>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            
+            <!-- Quick Stats Card -->
+            <div class="mt-8 p-4 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl text-white">
+                <h4 class="font-semibold mb-3">Quick Stats</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-primary-100">Today's Doses</span>
+                        <span class="font-bold" id="today-doses">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-primary-100">Adherence</span>
+                        <span class="font-bold" id="adherence-score">-</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Bottom Nav -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-100 lg:hidden z-50 safe-area-bottom">
+            <div class="flex justify-around py-2 px-4">
+                <a href="{{ url_for('dashboard') }}" class="flex flex-col items-center p-2 rounded-xl transition-all {% if request.endpoint == 'dashboard' %}text-primary-600 bg-primary-50{% else %}text-gray-500{% endif %}">
+                    <span class="text-2xl">🏠</span>
+                    <span class="text-xs font-medium">Home</span>
+                </a>
+                <a href="{{ url_for('medicines') }}" class="flex flex-col items-center p-2 rounded-xl transition-all {% if request.endpoint in ['medicines', 'add_medicine'] %}text-primary-600 bg-primary-50{% else %}text-gray-500{% endif %}">
+                    <span class="text-2xl">💊</span>
+                    <span class="text-xs font-medium">Meds</span>
+                </a>
+                <a href="{{ url_for('add_medicine') }}" class="flex flex-col items-center -mt-6">
+                    <div class="w-14 h-14 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-lg shadow-primary-200 border-4 border-white">
+                        <span class="text-2xl text-white">➕</span>
+                    </div>
+                    <span class="text-xs font-medium text-primary-600 mt-1">Add</span>
+                </a>
+                <a href="{{ url_for('caregivers') }}" class="flex flex-col items-center p-2 rounded-xl transition-all {% if request.endpoint == 'caregivers' %}text-primary-600 bg-primary-50{% else %}text-gray-500{% endif %}">
+                    <span class="text-2xl">👥</span>
+                    <span class="text-xs font-medium">Care</span>
+                </a>
+                <a href="{{ url_for('profile') }}" class="flex flex-col items-center p-2 rounded-xl transition-all {% if request.endpoint == 'profile' %}text-primary-600 bg-primary-50{% else %}text-gray-500{% endif %}">
+                    <span class="text-2xl">👤</span>
+                    <span class="text-xs font-medium">Profile</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 lg:p-8 pb-28 lg:pb-8 animate__animated animate__fadeIn">
+    {% endif %}
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="fixed top-20 right-4 z-50 space-y-2 max-w-sm" id="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash-message p-4 rounded-xl shadow-lg animate__animated animate__slideInRight flex items-center gap-3
+            {% if category == 'error' %}bg-red-50 border-l-4 border-red-500 text-red-700
+            {% elif category == 'warning' %}bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700
+            {% elif category == 'success' %}bg-green-50 border-l-4 border-green-500 text-green-700
+            {% else %}bg-blue-50 border-l-4 border-blue-500 text-blue-700{% endif %}">
+            <span class="text-xl">
+                {% if category == 'error' %}❌{% elif category == 'warning' %}⚠️{% elif category == 'success' %}✅{% else %}ℹ️{% endif %}
+            </span>
+            <p class="flex-1 font-medium">{{ message }}</p>
+            <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Page Content -->
+    {% block content %}{% endblock %}
+
+    {% if session.user_id %}
+        </main>
+    </div>
+    {% endif %}
+
+    <!-- JavaScript -->
+    <script>
+        // Auto-hide flash messages after 5 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.flash-message').forEach(msg => {
+                msg.classList.remove('animate__slideInRight');
+                msg.classList.add('animate__slideOutRight');
+                setTimeout(() => msg.remove(), 500);
+            });
+        }, 5000);
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Form validation enhancement
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn && !submitBtn.classList.contains('no-loading')) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<div class="spinner mx-auto"></div>';
+                }
+            });
+        });
+
+        // Fetch quick stats for sidebar
+        async function loadQuickStats() {
+            try {
+                const response = await fetch('/api/adherence');
+                const data = await response.json();
+                document.getElementById('today-doses').textContent = data.taken + '/' + data.total;
+                document.getElementById('adherence-score').textContent = data.score + '%';
+            } catch (e) {
+                console.log('Stats not available');
+            }
+        }
+        
+        if (document.getElementById('adherence-score')) {
+            loadQuickStats();
+        }
+
+        // Ripple effect for buttons
+        document.querySelectorAll('button, .btn-primary, .btn-secondary').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                ripple.style.cssText = `
+                    position: absolute;
+                    background: rgba(255,255,255,0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                    left: ${e.clientX - rect.left}px;
+                    top: ${e.clientY - rect.top}px;
+                    width: 100px;
+                    height: 100px;
+                    margin-left: -50px;
+                    margin-top: -50px;
+                `;
+                this.style.position = 'relative';
+                this.style.overflow = 'hidden';
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Add keyframe for ripple
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Time-based greeting
+        function getGreeting() {
+            const hour = new Date().getHours();
+            if (hour < 12) return '🌅 Good Morning';
+            if (hour < 17) return '☀️ Good Afternoon';
+            if (hour < 21) return '🌆 Good Evening';
+            return '🌙 Good Night';
+        }
+
+        // Update time displays
+        function updateTime() {
+            document.querySelectorAll('[data-time]').forEach(el => {
+                el.textContent = new Date().toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Confirmation dialogs
+        document.querySelectorAll('[data-confirm]').forEach(el => {
+            el.addEventListener('click', function(e) {
+                if (!confirm(this.dataset.confirm)) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // Lazy load images
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        img.src = img.dataset.src;
+                        observer.disconnect();
+                    }
+                });
+            });
+            observer.observe(img);
+        });
+
+        // Page transition
+        document.querySelectorAll('a:not([target="_blank"])').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (this.href && !this.href.includes('#') && !this.href.includes('javascript:')) {
+                    document.body.classList.add('animate__animated', 'animate__fadeOut');
+                }
+            });
+        });
+
+        console.log('💊 Medicine Reminder - Enhanced UI Loaded');
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}{{ medicine.name }} - Medicine Reminder{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto animate__animated animate__fadeIn">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{{ url_for('medicines') }}" 
+           class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium transition">
+            <span>←</span> Back to Medicines
+        </a>
+    </div>
+
+    <!-- Medicine Header Card -->
+    <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 mb-6">
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="p-4 bg-white/20 backdrop-blur rounded-2xl">
+                        <span class="text-5xl">💊</span>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">{{ medicine.name }}</h1>
+                        <p class="text-white/80 text-lg mt-1">{{ medicine.dosage }}</p>
+                    </div>
+                </div>
+                <span class="px-4 py-2 rounded-full font-semibold text-sm
+                       {% if medicine.active %}bg-green-400 text-green-900{% else %}bg-gray-300 text-gray-700{% endif %}">
+                    {% if medicine.active %}✓ Active{% else %}Inactive{% endif %}
+                </span>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-3 divide-x divide-gray-100">
+            <div class="p-4 text-center">
+                <p class="text-2xl font-bold text-indigo-600">{{ total_taken|default(0) }}</p>
+                <p class="text-xs text-gray-500 mt-1">Doses Taken</p>
+            </div>
+            <div class="p-4 text-center">
+                <p class="text-2xl font-bold text-green-600">{{ adherence_rate|default(0) }}%</p>
+                <p class="text-xs text-gray-500 mt-1">Adherence</p>
+            </div>
+            <div class="p-4 text-center">
+                <p class="text-2xl font-bold text-purple-600">{{ days_active|default(0) }}</p>
+                <p class="text-xs text-gray-500 mt-1">Days Active</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <!-- Schedule Card -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span class="p-2 bg-blue-100 rounded-lg">📅</span>
+                Schedule
+            </h2>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                    <span class="text-gray-500">Frequency</span>
+                    <span class="font-bold text-gray-800">{{ medicine.frequency }}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                    <span class="text-gray-500">Start Date</span>
+                    <span class="font-bold text-gray-800">{{ medicine.start_date }}</span>
+                </div>
+                {% if medicine.end_date %}
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                    <span class="text-gray-500">End Date</span>
+                    <span class="font-bold text-gray-800">{{ medicine.end_date }}</span>
+                </div>
+                {% else %}
+                <div class="flex justify-between items-center p-3 bg-green-50 rounded-xl">
+                    <span class="text-green-600">Status</span>
+                    <span class="font-bold text-green-700">Ongoing</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Reminder Times Card -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span class="p-2 bg-orange-100 rounded-lg">⏰</span>
+                Reminder Times
+            </h2>
+            <div class="flex flex-wrap gap-2">
+                {% for reminder in reminders %}
+                <div class="px-4 py-3 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl">
+                    <span class="font-bold text-indigo-700">{{ reminder.time }}</span>
+                </div>
+                {% else %}
+                <p class="text-gray-500 p-3">No reminders set</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% if medicine.instructions %}
+    <!-- Instructions Card -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span class="p-2 bg-green-100 rounded-lg">📝</span>
+            Special Instructions
+        </h2>
+        <div class="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+            <p class="text-gray-700 leading-relaxed">{{ medicine.instructions }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent History -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <span class="p-2 bg-purple-100 rounded-lg">📜</span>
+                Recent History
+            </h2>
+            <a href="{{ url_for('history') }}" class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+                View All →
+            </a>
+        </div>
+        {% if history %}
+        <div class="space-y-2">
+            {% for entry in history[:5] %}
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center
+                         {% if entry.status == 'taken' %}bg-green-100{% elif entry.status == 'missed' %}bg-red-100{% else %}bg-gray-200{% endif %}">
+                        <span class="text-xl">{% if entry.status == 'taken' %}✅{% elif entry.status == 'missed' %}❌{% else %}⏭️{% endif %}</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">{{ entry.taken_at or entry.scheduled_time }}</p>
+                        <p class="text-xs text-gray-500">{{ entry.date }}</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1.5 rounded-xl text-xs font-semibold
+                     {% if entry.status == 'taken' %}bg-green-100 text-green-700
+                     {% elif entry.status == 'missed' %}bg-red-100 text-red-700
+                     {% else %}bg-gray-200 text-gray-600{% endif %}">
+                    {{ entry.status|capitalize }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <div class="text-4xl mb-2 opacity-50">📜</div>
+            <p class="text-gray-500">No history yet</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-3">
+        <form method="POST" action="{{ url_for('toggle_medicine', medicine_id=medicine.id) }}" class="flex-1">
+            <button type="submit" 
+                    class="w-full px-6 py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2
+                           {% if medicine.active %}bg-orange-100 text-orange-700 hover:bg-orange-200{% else %}bg-green-100 text-green-700 hover:bg-green-200{% endif %}">
+                {% if medicine.active %}
+                <span>⏸️</span> Pause Medicine
+                {% else %}
+                <span>▶️</span> Resume Medicine
+                {% endif %}
+            </button>
+        </form>
+        <form method="POST" action="{{ url_for('delete_medicine', medicine_id=medicine.id) }}"
+              onsubmit="return confirm('Delete {{ medicine.name }}? This cannot be undone.');" class="flex-1">
+            <button type="submit" 
+                    class="w-full px-6 py-4 bg-red-100 text-red-700 rounded-xl font-bold hover:bg-red-200 transition-all flex items-center justify-center gap-2">
+                <span>🗑️</span> Delete Medicine
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

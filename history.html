@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Medicine History - Medicine Reminder{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+            <span class="text-4xl">📊</span>
+            Medicine History
+        </h1>
+        <p class="text-gray-500 mt-1">Track your medication adherence over time</p>
+    </div>
+
+    <!-- Stats Summary -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-bl-full opacity-50"></div>
+            <div class="relative">
+                <p class="text-4xl font-extrabold text-blue-600">{{ stats.total|default(0) }}</p>
+                <p class="text-gray-500 mt-1 text-sm font-medium">Total Doses</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-green-100 rounded-bl-full opacity-50"></div>
+            <div class="relative">
+                <p class="text-4xl font-extrabold text-green-600">{{ stats.taken|default(0) }}</p>
+                <p class="text-gray-500 mt-1 text-sm font-medium">✅ Taken</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-red-100 rounded-bl-full opacity-50"></div>
+            <div class="relative">
+                <p class="text-4xl font-extrabold text-red-600">{{ stats.missed|default(0) }}</p>
+                <p class="text-gray-500 mt-1 text-sm font-medium">❌ Missed</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-20 h-20 bg-purple-100 rounded-bl-full opacity-50"></div>
+            <div class="relative">
+                <p class="text-4xl font-extrabold text-purple-600">{{ stats.adherence|default(0) }}%</p>
+                <p class="text-gray-500 mt-1 text-sm font-medium">📈 Adherence</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Adherence Progress Bar -->
+    <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-6">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-gray-800">Weekly Adherence</h3>
+            <span class="text-sm text-gray-500">Last 7 days</span>
+        </div>
+        <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-1000" 
+                 style="width: {{ stats.adherence|default(0) }}%"></div>
+        </div>
+        <div class="flex justify-between mt-2 text-xs text-gray-500">
+            <span>0%</span>
+            <span>Target: 80%</span>
+            <span>100%</span>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="bg-white rounded-2xl p-4 shadow-lg border border-gray-100 mb-6">
+        <div class="flex flex-wrap gap-2">
+            <button class="date-filter-btn active px-4 py-2 rounded-xl text-sm font-medium" data-range="7">
+                Last 7 Days
+            </button>
+            <button class="date-filter-btn px-4 py-2 rounded-xl text-sm font-medium" data-range="30">
+                Last 30 Days
+            </button>
+            <button class="date-filter-btn px-4 py-2 rounded-xl text-sm font-medium" data-range="90">
+                Last 3 Months
+            </button>
+            <button class="date-filter-btn px-4 py-2 rounded-xl text-sm font-medium" data-range="all">
+                All Time
+            </button>
+        </div>
+    </div>
+
+    <!-- History Timeline -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <span>📜</span> Activity Timeline
+            </h2>
+            <span class="text-sm text-gray-500">{{ history|length if history else 0 }} records</span>
+        </div>
+        
+        {% if history %}
+        <div class="divide-y divide-gray-100">
+            {% for entry in history %}
+            <div class="p-5 hover:bg-gray-50 transition-colors flex items-center gap-4 animate__animated animate__fadeIn"
+                 style="animation-delay: {{ loop.index * 0.05 }}s">
+                <!-- Status Icon -->
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center
+                         {% if entry.status == 'taken' %}bg-green-100
+                         {% elif entry.status == 'missed' %}bg-red-100
+                         {% else %}bg-gray-100{% endif %}">
+                        <span class="text-2xl">
+                            {% if entry.status == 'taken' %}✅
+                            {% elif entry.status == 'missed' %}❌
+                            {% else %}⏭️{% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Medicine Info -->
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-gray-800 truncate">{{ entry.medicine_name }}</h3>
+                    <p class="text-sm text-gray-500">{{ entry.dosage }}</p>
+                </div>
+                
+                <!-- Time Info -->
+                <div class="text-right flex-shrink-0">
+                    <p class="font-semibold text-gray-800">{{ entry.scheduled_time }}</p>
+                    <p class="text-xs text-gray-500">{{ entry.date }}</p>
+                </div>
+                
+                <!-- Status Badge -->
+                <div class="flex-shrink-0">
+                    <span class="px-4 py-2 rounded-xl text-sm font-semibold inline-block
+                         {% if entry.status == 'taken' %}bg-green-100 text-green-700
+                         {% elif entry.status == 'missed' %}bg-red-100 text-red-700
+                         {% else %}bg-gray-100 text-gray-500{% endif %}">
+                        {{ entry.status|capitalize }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Load More -->
+        <div class="p-4 border-t border-gray-100 text-center">
+            <button class="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
+                Load More History →
+            </button>
+        </div>
+        {% else %}
+        <div class="p-16 text-center">
+            <div class="text-8xl mb-4 opacity-50">📜</div>
+            <h3 class="text-xl font-bold text-gray-600 mb-2">No history yet</h3>
+            <p class="text-gray-500 mb-6">Start taking your medicines to build your health history</p>
+            <a href="{{ url_for('dashboard') }}" 
+               class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition">
+                📋 Go to Dashboard
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .date-filter-btn {
+        background: #f3f4f6;
+        color: #6b7280;
+        transition: all 0.3s ease;
+    }
+    .date-filter-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .date-filter-btn:hover:not(.active) {
+        background: #e5e7eb;
+    }
+</style>
+
+<script>
+    document.querySelectorAll('.date-filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.date-filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            // Filter history by date range
+            const range = this.dataset.range;
+            // TODO: Implement date filtering via API
+        });
+    });
+</script>
+{% endblock %}

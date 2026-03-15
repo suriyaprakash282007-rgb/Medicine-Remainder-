@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Medicine Reminder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        
+        .input-focus:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-animated {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-animated::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-animated:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-animated:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.4);
+        }
+        
+        /* Password Strength Indicator */
+        .strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Particles */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: rise 10s infinite;
+        }
+        
+        @keyframes rise {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        /* Step indicator */
+        .step {
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            transform: scale(1.1);
+        }
+        
+        .step-line {
+            transition: all 0.5s ease;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <!-- Animated Particles -->
+    <div class="particles">
+        <div class="particle" style="left: 5%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 25%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 45%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 65%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 85%; animation-delay: 3s;"></div>
+    </div>
+
+    <div class="w-full max-w-md relative z-10">
+        <!-- Logo -->
+        <div class="text-center mb-6 animate__animated animate__fadeInDown">
+            <div class="inline-flex items-center justify-center p-4 glass-card rounded-2xl shadow-xl mb-4 floating">
+                <span class="text-5xl">💊</span>
+            </div>
+            <h1 class="text-3xl font-extrabold text-white mb-1">Create Account</h1>
+            <p class="text-white/80">Start your health journey today</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="p-4 rounded-xl mb-4 animate__animated animate__shakeX shadow-lg
+            {% if category == 'error' %}bg-red-500 text-white{% else %}bg-green-500 text-white{% endif %}">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">{% if category == 'error' %}❌{% else %}✅{% endif %}</span>
+                <p class="font-medium">{{ message }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- Registration Card -->
+        <div class="glass-card rounded-3xl shadow-2xl p-6 animate__animated animate__fadeInUp">
+            <!-- Progress Steps -->
+            <div class="flex items-center justify-center mb-6">
+                <div class="flex items-center gap-2">
+                    <div id="step1" class="step active flex items-center justify-center w-10 h-10 rounded-full bg-indigo-600 text-white font-bold">1</div>
+                    <div id="line1" class="step-line w-12 h-1 bg-gray-200 rounded"></div>
+                    <div id="step2" class="step flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 text-gray-500 font-bold">2</div>
+                    <div id="line2" class="step-line w-12 h-1 bg-gray-200 rounded"></div>
+                    <div id="step3" class="step flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 text-gray-500 font-bold">✓</div>
+                </div>
+            </div>
+            
+            <form method="POST" action="{{ url_for('register') }}" id="register-form">
+                <!-- Step 1: Personal Info -->
+                <div id="section1" class="space-y-4">
+                    <h3 class="text-lg font-bold text-gray-800 text-center mb-4">👤 Personal Information</h3>
+                    
+                    <div>
+                        <label for="name" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Full Name
+                        </label>
+                        <input type="text" id="name" name="name" required
+                               class="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl input-focus focus:outline-none focus:border-indigo-500 bg-gray-50"
+                               placeholder="John Doe">
+                    </div>
+                    
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            📧 Email Address
+                        </label>
+                        <input type="email" id="email" name="email" required
+                               class="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl input-focus focus:outline-none focus:border-indigo-500 bg-gray-50"
+                               placeholder="your@email.com">
+                    </div>
+                    
+                    <div>
+                        <label for="phone" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            📱 Phone Number
+                        </label>
+                        <input type="tel" id="phone" name="phone"
+                               class="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl input-focus focus:outline-none focus:border-indigo-500 bg-gray-50"
+                               placeholder="+1 (555) 000-0000">
+                    </div>
+                    
+                    <button type="button" onclick="nextStep()" 
+                            class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl text-lg font-bold btn-animated mt-4">
+                        <span class="relative z-10">Continue →</span>
+                    </button>
+                </div>
+                
+                <!-- Step 2: Security -->
+                <div id="section2" class="space-y-4 hidden">
+                    <h3 class="text-lg font-bold text-gray-800 text-center mb-4">🔐 Create Password</h3>
+                    
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Password
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="password" name="password" required
+                                   class="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl input-focus focus:outline-none focus:border-indigo-500 bg-gray-50 pr-12"
+                                   placeholder="••••••••"
+                                   oninput="checkPasswordStrength()">
+                            <button type="button" onclick="togglePassword('password', 'eye1')" 
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <span id="eye1">👁️</span>
+                            </button>
+                        </div>
+                        <!-- Strength indicator -->
+                        <div class="mt-2 flex gap-1">
+                            <div id="str1" class="strength-bar flex-1 bg-gray-200"></div>
+                            <div id="str2" class="strength-bar flex-1 bg-gray-200"></div>
+                            <div id="str3" class="strength-bar flex-1 bg-gray-200"></div>
+                            <div id="str4" class="strength-bar flex-1 bg-gray-200"></div>
+                        </div>
+                        <p id="strength-text" class="text-xs mt-1 text-gray-500">Enter a password</p>
+                    </div>
+                    
+                    <div>
+                        <label for="confirm_password" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Confirm Password
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="confirm_password" name="confirm_password" required
+                                   class="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl input-focus focus:outline-none focus:border-indigo-500 bg-gray-50 pr-12"
+                                   placeholder="••••••••"
+                                   oninput="checkPasswordMatch()">
+                            <button type="button" onclick="togglePassword('confirm_password', 'eye2')" 
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <span id="eye2">👁️</span>
+                            </button>
+                        </div>
+                        <p id="match-text" class="text-xs mt-1 text-gray-500"></p>
+                    </div>
+                    
+                    <div class="flex gap-3 mt-4">
+                        <button type="button" onclick="prevStep()" 
+                                class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl text-lg font-bold hover:bg-gray-300 transition">
+                            ← Back
+                        </button>
+                        <button type="submit" 
+                                class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl text-lg font-bold btn-animated">
+                            <span class="relative z-10">🎉 Create Account</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <p class="text-center text-gray-600 text-sm">
+                    Already have an account? 
+                    <a href="{{ url_for('login') }}" class="text-indigo-600 hover:text-indigo-700 font-bold hover:underline">
+                        Sign in →
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Benefits -->
+        <div class="mt-6 glass-card rounded-2xl p-4 animate__animated animate__fadeIn animate__delay-1s">
+            <h3 class="text-white font-bold text-center mb-3">Why Join Us? ✨</h3>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="flex items-center gap-2 text-white/90">
+                    <span>✅</span> Smart Reminders
+                </div>
+                <div class="flex items-center gap-2 text-white/90">
+                    <span>✅</span> AI Health Insights
+                </div>
+                <div class="flex items-center gap-2 text-white/90">
+                    <span>✅</span> Family Sharing
+                </div>
+                <div class="flex items-center gap-2 text-white/90">
+                    <span>✅</span> 24/7 Emergency
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        
+        function nextStep() {
+            // Validate current step
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            
+            if (!name || !email) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Animate transition
+            document.getElementById('section1').classList.add('hidden');
+            document.getElementById('section2').classList.remove('hidden');
+            
+            // Update steps indicator
+            document.getElementById('step1').classList.remove('bg-indigo-600', 'text-white');
+            document.getElementById('step1').classList.add('bg-green-500', 'text-white');
+            document.getElementById('step1').innerHTML = '✓';
+            document.getElementById('line1').classList.add('bg-green-500');
+            
+            document.getElementById('step2').classList.remove('bg-gray-200', 'text-gray-500');
+            document.getElementById('step2').classList.add('bg-indigo-600', 'text-white', 'active');
+            
+            currentStep = 2;
+        }
+        
+        function prevStep() {
+            document.getElementById('section2').classList.add('hidden');
+            document.getElementById('section1').classList.remove('hidden');
+            
+            // Reset steps indicator
+            document.getElementById('step1').classList.add('bg-indigo-600', 'text-white', 'active');
+            document.getElementById('step1').classList.remove('bg-green-500');
+            document.getElementById('step1').innerHTML = '1';
+            document.getElementById('line1').classList.remove('bg-green-500');
+            
+            document.getElementById('step2').classList.add('bg-gray-200', 'text-gray-500');
+            document.getElementById('step2').classList.remove('bg-indigo-600', 'text-white', 'active');
+            
+            currentStep = 1;
+        }
+        
+        function togglePassword(inputId, eyeId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(eyeId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                icon.textContent = '👁️';
+            }
+        }
+        
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const str1 = document.getElementById('str1');
+            const str2 = document.getElementById('str2');
+            const str3 = document.getElementById('str3');
+            const str4 = document.getElementById('str4');
+            const text = document.getElementById('strength-text');
+            
+            let strength = 0;
+            
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength++;
+            if (/[0-9]/.test(password) || /[^A-Za-z0-9]/.test(password)) strength++;
+            
+            const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
+            const texts = ['Weak', 'Fair', 'Good', 'Strong'];
+            const textColors = ['text-red-500', 'text-orange-500', 'text-yellow-500', 'text-green-500'];
+            
+            [str1, str2, str3, str4].forEach((el, i) => {
+                el.className = 'strength-bar flex-1 rounded ' + (i < strength ? colors[strength - 1] : 'bg-gray-200');
+            });
+            
+            text.className = 'text-xs mt-1 ' + (strength > 0 ? textColors[strength - 1] : 'text-gray-500');
+            text.textContent = strength > 0 ? `Password strength: ${texts[strength - 1]}` : 'Enter a password';
+            
+            checkPasswordMatch();
+        }
+        
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm_password').value;
+            const text = document.getElementById('match-text');
+            
+            if (!confirm) {
+                text.textContent = '';
+                return;
+            }
+            
+            if (password === confirm) {
+                text.className = 'text-xs mt-1 text-green-500';
+                text.textContent = '✓ Passwords match';
+            } else {
+                text.className = 'text-xs mt-1 text-red-500';
+                text.textContent = '✗ Passwords do not match';
+            }
+        }
+        
+        // Form submission
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm_password').value;
+            
+            if (password !== confirm) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            const btn = this.querySelector('button[type="submit"]');
+            btn.innerHTML = `
+                <span class="relative z-10 flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Creating...
+                </span>
+            `;
+        });
+    </script>
+</body>
+</html>
